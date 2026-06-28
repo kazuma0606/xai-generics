@@ -1,0 +1,54 @@
+name: t1_t2_2d_prepare_legacy_cyclegan
+
+script:
+  path: scripts/prepare/t1_t2_2d_prepare.py
+
+inputs:
+  train_root: data_set/Pre-operative_TCGA_GBM_NIfTI_and_Segmentations
+  generation_test_root: data_set/BraTS2017TestingData
+
+outputs:
+  derived_root: outputs/derived/t1_t2_cyclegan_legacy
+  layout: flat
+  train_split:
+    split_name: train
+    source_dir_name: trainA
+    target_dir_name: trainB
+    manifest_name: train_manifest.csv
+  generation_test_split:
+    split_name: generation_test
+    source_dir_name: testA
+    target_dir_name: testB
+    manifest_name: generation_test_manifest.csv
+
+modalities:
+  source: t1
+  target: t2
+
+slice_policy:
+  orientation: axial
+  traversal: full_depth
+  pairing_key:
+    - patient_id
+    - slice_index
+  legacy_export_expression:
+    source: "np.flipud(img0[:, :, j, 1].T)"
+    target: "np.flipud(img0[:, :, j, 3].T)"
+  skip_empty_pair: true
+
+png_export:
+  enabled: true
+  normalization: per_slice_min_max_uint8
+
+legacy_cyclegan_bridge:
+  train_dataroot: outputs/derived/t1_t2_cyclegan_legacy
+  expected_dirs:
+    - trainA
+    - trainB
+    - testA
+    - testB
+
+smoke_test:
+  enabled: true
+  limit_cases: 1
+  confirmed_output_example: outputs/derived/t1_t2_cyclegan_legacy_smoke

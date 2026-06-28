@@ -1,0 +1,65 @@
+name: t1_t2_generation_eval
+
+experiment_ref: configs/2d/train_t1_t2_cyclegan.yaml
+
+script:
+  path: scripts/eval/t1_t2_image_metrics.py
+
+generation:
+  split: generation_test
+  direction: t1_to_t2
+  cyclegan_direction_cli: AtoB
+  epoch: 50
+  batch_size: 1
+  preprocess: resize_and_crop
+  load_size: 256
+  crop_size: 256
+
+metrics:
+  image_level:
+    - name: rmse
+      likely_library: scikit-learn-or-numpy
+    - name: mutual_information
+      likely_library: scikit-learn
+    - name: psnr
+      likely_library: scikit-image
+    - name: ssim
+      likely_library: scikit-image
+  planned_future:
+    - fid_exploratory
+    - roi_aware_metrics
+    - radiomics_feature_agreement
+
+outputs:
+  generated_root: outputs/generated/t1_t2_cyclegan_2d
+  metric_root: outputs/metrics/t1_t2_cyclegan_2d
+  radiomics_root: outputs/radiomics/t1_t2_cyclegan_2d
+  files:
+    - per_pair_metrics.csv
+    - summary_metrics.csv
+
+legacy_observed_flow:
+  test_image_root_pattern: results/<case>/T1W2T2W_batch_1_cyclegan/test_200/images
+  image_pattern_examples:
+    - "*_<slice>_real_B.png"
+    - "*_<slice>_fake_B.png"
+  reverse_direction_image_pattern_examples:
+    - "*_<slice>_real_A.png"
+    - "*_<slice>_fake_A.png"
+  downstream_volume_files:
+    - real_T2.nrrd
+    - fake_T2_epoch_200.nrrd
+    - contour.nrrd
+  downstream_csv_files:
+    - CSV/real_T2.csv
+    - CSV/fake_T2.csv
+
+notes:
+  test_means_generation_input: true
+  prognosis_validation_is_separate: true
+  t1_is_domain_a: true
+  t2_is_domain_b: true
+  exact_metric_implementation_cell_still_pending: true
+  notebook_code_cell_audit_found_no_explicit_metric_code: true
+  standard_python_library_reimplementation_is_acceptable: true
+  mutual_information_requires_binning_choice: true

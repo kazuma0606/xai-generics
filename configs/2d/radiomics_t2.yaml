@@ -1,0 +1,33 @@
+name: t2_radiomics_downstream
+
+upstream_generation_ref: configs/2d/eval_t1_t2.yaml
+upstream_reconstruction_ref: configs/2d/reconstruct_t2_volumes.yaml
+notebook_reference: ipynb/Pre_operative(T2_radiomics).ipynb
+
+inputs:
+  case_root: data_set/Pre-operative_TCGA_GBM_NIfTI_and_Segmentations
+  generated_image_name: fake_T2_epoch_200.nrrd
+  real_image_name: real_T2.nrrd
+  contour_image_name: contour.nrrd
+  mask_priority:
+    - "*GlistrBoost_ManuallyCorrected.nii.gz"
+    - "*GlistrBoost.nii.gz"
+
+extraction:
+  library: pyradiomics
+  dimensionality: 3d
+  source_modality: t2
+  output_csv_names:
+    real: real_T2.csv
+    fake: fake_T2.csv
+
+downstream:
+  supports:
+    - radiomics_feature_tables
+    - rad_score_construction
+    - lasso_cox_feature_selection
+    - logrank_group_comparison
+  prognosis_notebook_reference: ipynb/rad_score_T2_to_FLAIR.ipynb
+
+outputs:
+  feature_root: outputs/radiomics/t2

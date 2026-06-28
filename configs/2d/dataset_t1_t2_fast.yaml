@@ -1,0 +1,72 @@
+name: t1_t2_2d_fast
+
+data:
+  canonical_source_format: nii_gz
+  training_root: data_set/Pre-operative_TCGA_GBM_NIfTI_and_Segmentations
+  generation_test_root: data_set/BraTS2017TestingData
+  raw_volume_whitelist:
+    - "*_t1.nii.gz"
+    - "*_t2.nii.gz"
+  ignore_patterns:
+    - "fake_*"
+    - "real_*"
+    - "*.png"
+    - "*.csv"
+    - "CSV/*"
+    - "*.nrrd"
+
+modalities:
+  source: t1
+  target: t2
+  legacy_volume_channel_map:
+    t1: 1
+    t2: 3
+
+slice_sampling:
+  mode: axial_2d
+  selection_policy: all_eligible_slices
+  use_mask_filtering: false
+  minimum_nonzero_ratio: null
+  pairing_key:
+    - patient_id
+    - slice_index
+  legacy_export_pattern:
+    source_dir: testA
+    target_dir: testB
+    filename: "{patient_id}_img_{slice_index}.png"
+  legacy_slice_expression:
+    source: "np.flipud(img0[:, :, j, 1].T)"
+    target: "np.flipud(img0[:, :, j, 3].T)"
+
+preprocessing:
+  intensity_normalization: legacy_notebook_compatible
+  resize:
+    enabled: true
+    load_size: 64
+    apply_to_dataset: true
+  crop:
+    enabled: false
+    crop_size: 64
+  horizontal_flip:
+    enabled: legacy_default
+
+cache:
+  enabled: false
+  cache_root: outputs/cache/t1_t2_2d_fast
+  format: png
+
+derived_dataset:
+  root: outputs/derived/t1_t2_2d_fast
+  split_layout:
+    source_dir_name: A
+    target_dir_name: B
+  manifest_name: manifest.csv
+
+metadata:
+  include_fields:
+    - patient_id
+    - source_modality
+    - target_modality
+    - slice_index
+    - source_path
+    - target_path

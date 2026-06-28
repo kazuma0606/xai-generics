@@ -1,0 +1,82 @@
+name: t1_t2_cyclegan_2d
+
+experiment:
+  family: image_translation
+  baseline: cycle_gan
+  notebook_reference: ipynb/CycleGAN_batch1_RGB_T1_T2_.ipynb
+  run_name_legacy: CE2RGB_T1_T2_FLIR_batch_1_cyclegan
+  intended_clean_name: t1_t2_cyclegan_2d
+  legacy_checkpoint_reference: checkpoint/T1W2T2W_batch_1_cyclegan
+  legacy_script_reference:
+    - scripts/clasical/train.py
+    - scripts/clasical/test.py
+
+dataset_ref: configs/2d/dataset_t1_t2.yaml
+
+model:
+  type: cycle_gan
+  netG: resnet_9blocks
+  netD: basic
+  input_nc: 3
+  output_nc: 3
+  ngf: 64
+  ndf: 64
+  pool_size: 50
+
+training:
+  batch_size: 1
+  direction: AtoB
+  preprocess: resize_and_crop
+  n_epochs: 100
+  n_epochs_decay: 100
+  epoch_count_start: 1
+  continue_train: false
+  first_reproduction_policy:
+    keep_legacy_crop_baseline: true
+    load_size: 286
+    crop_size: 256
+
+resume:
+  supported: true
+  continue_train_flag: true
+  epoch_count_start_example: 10
+  notebook_reference_example:
+    command_fragment: "--continue_train --epoch_count 10"
+  observed_checkpoint_resume_state:
+    epoch: latest
+    epoch_count: 199
+    continue_train: true
+
+logging:
+  display_freq: 400
+  print_freq: 100
+  save_latest_freq: 5000
+  save_epoch_freq: 5
+  update_html_freq: 1000
+
+runtime:
+  device: cuda
+  mixed_precision: false
+  benchmark_first: true
+  benchmark_subset_cases: 4
+  benchmark_max_steps: 100
+  legacy_gpu_ids: "0"
+
+inference_reference:
+  observed_test_direction: BtoA
+  observed_test_epoch: 200
+  observed_test_preprocess: resize_and_crop
+  observed_test_load_size: 256
+  observed_test_crop_size: 256
+
+checkpoint_audit:
+  generator_weights_present: false
+  discriminator_weights_present: true
+  suitable_for_direct_inference: false
+  suitable_for_full_resume: false
+
+artifacts:
+  run_root: outputs/runs/t1_t2_cyclegan_2d
+  checkpoint_root: outputs/runs/t1_t2_cyclegan_2d/checkpoints
+  sample_root: outputs/runs/t1_t2_cyclegan_2d/samples
+  log_root: outputs/runs/t1_t2_cyclegan_2d/logs

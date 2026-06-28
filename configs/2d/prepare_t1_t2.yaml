@@ -1,0 +1,39 @@
+name: t1_t2_2d_prepare
+
+script:
+  path: scripts/prepare/t1_t2_2d_prepare.py
+
+inputs:
+  train_root: data_set/Pre-operative_TCGA_GBM_NIfTI_and_Segmentations
+  generation_test_root: data_set/BraTS2017TestingData
+
+outputs:
+  derived_root: outputs/derived/t1_t2_2d
+  split_layout:
+    source_dir_name: A
+    target_dir_name: B
+  manifest_name: manifest.csv
+
+modalities:
+  source: t1
+  target: t2
+
+slice_policy:
+  orientation: axial
+  traversal: full_depth
+  pairing_key:
+    - patient_id
+    - slice_index
+  legacy_export_expression:
+    source: "np.flipud(img0[:, :, j, 1].T)"
+    target: "np.flipud(img0[:, :, j, 3].T)"
+  skip_empty_pair: true
+
+png_export:
+  enabled: true
+  normalization: per_slice_min_max_uint8
+
+smoke_test:
+  enabled: true
+  limit_cases: 2
+  recommended_split: generation_test

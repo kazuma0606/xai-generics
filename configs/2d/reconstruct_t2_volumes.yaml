@@ -1,0 +1,31 @@
+name: t2_volume_reconstruction
+
+upstream_eval_ref: configs/2d/eval_t1_t2.yaml
+
+script:
+  path: scripts/postprocess/reconstruct_t2_volumes.py
+
+inputs:
+  legacy_case_image_root_pattern: results/<case>/T1W2T2W_batch_1_cyclegan/test_200/images
+  cyclegan_direction_cli: AtoB
+  expected_image_patterns:
+    - "*_<slice>_real_B.png"
+    - "*_<slice>_fake_B.png"
+  reverse_direction_image_patterns:
+    - "*_<slice>_real_A.png"
+    - "*_<slice>_fake_A.png"
+
+outputs:
+  case_output_root: outputs/radiomics/t1_t2_cyclegan_2d/<case>
+  real_volume_name: real_T2.nrrd
+  fake_volume_name: fake_T2_epoch_200.nrrd
+
+reconstruction:
+  stack_axis_order: slice_height_width
+  grayscale_policy:
+    rgb_equal_channels: first_channel
+    rgb_non_equal_channels: luminance_weighted
+
+notes:
+  contour_mask_not_generated_here: true
+  contour_mask_must_come_from_raw_segmentation_or_separate_conversion: true
